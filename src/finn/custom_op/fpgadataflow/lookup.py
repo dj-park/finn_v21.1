@@ -285,13 +285,22 @@ class Lookup(HLSCustomOp):
 
     def pragmas(self):
         mem_mode = self.get_nodeattr("mem_mode")
+        # my_pragmas = [
+        #     "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+        # ]
+        # my_pragmas.append(
+        #     "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+        # )
+        # my_pragmas.append("#pragma HLS INTERFACE ap_ctrl_none port=return")
         my_pragmas = [
-            "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=in0"
         ]
         my_pragmas.append(
-            "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=out"
         )
-        my_pragmas.append("#pragma HLS INTERFACE ap_ctrl_none port=return")
+        # my_pragmas.append("#pragma HLS INTERFACE ap_ctrl_none port=return")
+
+
         if mem_mode == "const":
             my_pragmas.append(
                 "#pragma HLS BIND_STORAGE variable=embeddings type=ROM_2P impl=BRAM"

@@ -70,15 +70,16 @@ class HLSSynthIP(NodeLocalTransformation):
                     "ipgen_path"
                 ):
                     # call the compilation function for this node
-                    inst.ipgen_singlenode_code()
+                    inst.ipgen_singlenode_code() 
                 else:
                     warnings.warn("Using pre-existing IP for %s" % node.name)
                 # ensure that executable path is now set
-                assert (
-                    inst.get_nodeattr("ipgen_path") != ""
-                ), """Transformation
-                HLSSynthIP was not successful. Node attribute "ipgen_path"
-                is empty."""
+                # DJP: Don't call... just need HLS code
+                # assert (
+                #     inst.get_nodeattr("ipgen_path") != ""
+                # ), """Transformation
+                # HLSSynthIP was not successful. Node attribute "ipgen_path"
+                # is empty."""
             except KeyError:
                 # exception if op_type is not supported
                 raise Exception(

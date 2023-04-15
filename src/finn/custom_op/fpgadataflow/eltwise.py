@@ -445,18 +445,30 @@ class StreamingEltwise(HLSCustomOp):
         ]
 
     def pragmas(self):
+        # self.code_gen_dict["$PRAGMAS$"] = [
+        #     "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+        # ]
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE axis port=in1 name=in1_" + self.hls_sname()
+        # )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+        # )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
         self.code_gen_dict["$PRAGMAS$"] = [
-            "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=in0 in0_"
         ]
         self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE axis port=in1 name=in1_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=in1 in1_"
         )
         self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=out out_"
         )
-        self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE ap_ctrl_none port=return"
-        )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
 
     def get_verilog_top_module_intf_names(self):
         intf_names = super().get_verilog_top_module_intf_names()

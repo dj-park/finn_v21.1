@@ -335,7 +335,7 @@ class HLSCustomOp(CustomOp):
             "config_compile -disable_unroll_code_size_check -pipeline_style flp",
             "config_interface -m_axi_addr64",
             "config_rtl -module_auto_prefix",
-            "config_rtl -deadlock_detection none",
+            # "config_rtl -deadlock_detection none",
         ]
         return default_directives
 
@@ -350,17 +350,17 @@ class HLSCustomOp(CustomOp):
         builder = CallHLS()
         builder.append_tcl(code_gen_dir + "/hls_syn_{}.tcl".format(node.name))
         builder.set_ipgen_path(code_gen_dir + "/project_{}".format(node.name))
-        builder.build(code_gen_dir)
-        ipgen_path = builder.ipgen_path
-        assert os.path.isdir(ipgen_path), "IPGen failed: %s not found" % (ipgen_path)
-        self.set_nodeattr("ipgen_path", ipgen_path)
-        ip_path = ipgen_path + "/sol1/impl/ip"
-        assert os.path.isdir(
-            ip_path
-        ), "IPGen failed: %s not found. Check log under %s" % (ip_path, code_gen_dir)
-        self.set_nodeattr("ip_path", ip_path)
-        vlnv = "xilinx.com:hls:%s:1.0" % node.name
-        self.set_nodeattr("ip_vlnv", vlnv)
+        # builder.build(code_gen_dir) # DJP: Don't build
+        # ipgen_path = builder.ipgen_path
+        # assert os.path.isdir(ipgen_path), "IPGen failed: %s not found" % (ipgen_path)
+        # self.set_nodeattr("ipgen_path", ipgen_path)
+        # ip_path = ipgen_path + "/sol1/impl/ip"
+        # assert os.path.isdir(
+        #     ip_path
+        # ), "IPGen failed: %s not found. Check log under %s" % (ip_path, code_gen_dir)
+        # self.set_nodeattr("ip_path", ip_path)
+        # vlnv = "xilinx.com:hls:%s:1.0" % node.name
+        # self.set_nodeattr("ip_vlnv", vlnv)
 
     def code_generation_cppsim(self, model):
         """Generates c++ code for simulation (cppsim)."""

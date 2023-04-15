@@ -201,14 +201,15 @@ class StreamingFIFO(HLSCustomOp):
             f.write("cd {}\n".format(verilog_dir))
             f.write("vivado -mode batch -source package_ip.tcl\n")
             f.write("cd {}\n".format(working_dir))
-        bash_command = ["bash", make_project_sh]
-        process_compile = subprocess.Popen(bash_command, stdout=subprocess.PIPE)
-        process_compile.communicate()
-        # set ipgen_path and ip_path to point to the new packaged IP
-        self.set_nodeattr("ipgen_path", verilog_dir)
-        self.set_nodeattr("ip_path", verilog_dir)
-        vlnv = "xilinx.com:hls:%s:1.0" % (self.onnx_node.name)
-        self.set_nodeattr("ip_vlnv", vlnv)
+        # DJP: Don't run Vivado
+        # bash_command = ["bash", make_project_sh]
+        # process_compile = subprocess.Popen(bash_command, stdout=subprocess.PIPE)
+        # process_compile.communicate()
+        # # set ipgen_path and ip_path to point to the new packaged IP
+        # self.set_nodeattr("ipgen_path", verilog_dir)
+        # self.set_nodeattr("ip_path", verilog_dir)
+        # vlnv = "xilinx.com:hls:%s:1.0" % (self.onnx_node.name)
+        # self.set_nodeattr("ip_vlnv", vlnv)
         self.code_gen_dict.clear()
 
     def get_normal_input_shape(self, ind=0):

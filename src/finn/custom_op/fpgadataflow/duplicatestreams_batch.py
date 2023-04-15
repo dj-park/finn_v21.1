@@ -386,17 +386,29 @@ class DuplicateStreams_Batch(HLSCustomOp):
 
     def pragmas(self):
         n_outputs = self.get_num_output_streams()
+        # self.code_gen_dict["$PRAGMAS$"] = [
+        #     "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+        # ]
+        # for i in range(n_outputs):
+        #     self.code_gen_dict["$PRAGMAS$"].append(
+        #         "#pragma HLS INTERFACE axis port=out%d name=out%d_%s"
+        #         % (i, i, self.hls_sname())
+        #     )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
         self.code_gen_dict["$PRAGMAS$"] = [
-            "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=in0"
         ]
         for i in range(n_outputs):
             self.code_gen_dict["$PRAGMAS$"].append(
-                "#pragma HLS INTERFACE axis port=out%d name=out%d_%s"
-                % (i, i, self.hls_sname())
+                "#pragma HLS INTERFACE axis register port=out%d"
+                % (i)
             )
-        self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE ap_ctrl_none port=return"
-        )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
+
 
     def get_verilog_top_module_intf_names(self):
         intf_names = super().get_verilog_top_module_intf_names()

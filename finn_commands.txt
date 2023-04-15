@@ -1,0 +1,12 @@
+export FINN_DOCKER_TAG=maltanar/finn:dev_latest
+export FINN_DOCKER_PREBUILT=1
+export FINN_HOST_BUILD_DIR=/home/dopark/workspace/finn_21_1/_build_dir
+./run-docker.sh build_dataflow .
+
+
+<Jupyter notebook>
+export FINN_DOCKER_TAG=maltanar/finn:dev_latest
+export FINN_DOCKER_PREBUILT=1
+export FINN_HOST_BUILD_DIR=/home/dopark/workspace/finn_21_1/_build_dir
+bash ./run-docker.sh notebook
+

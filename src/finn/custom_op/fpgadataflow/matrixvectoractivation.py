@@ -1043,9 +1043,7 @@ class MatrixVectorActivation(HLSCustomOp):
         numInputVectors = list(self.get_nodeattr("numInputVectors"))
         numReps = np.prod(numInputVectors)
         self.code_gen_dict["$DEFINES$"] = [
-            """#define MW1 {}\n #define MH1 {}\n
-            #define SIMD1 {}\n #define PE1 {}\n #define WMEM1 {}\n
-            #define TMEM1 {}\n #define numReps {}""".format(
+            "#define MW1 {}\n#define MH1 {}\n#define SIMD1 {}\n#define PE1 {}\n#define WMEM1 {}\n#define TMEM1 {}\n#define numReps {}".format(
                 self.get_nodeattr("MW"),
                 self.get_nodeattr("MH"),
                 self.get_nodeattr("SIMD"),
@@ -1227,15 +1225,25 @@ class MatrixVectorActivation(HLSCustomOp):
     def pragmas(self):
         mem_mode = self.get_nodeattr("mem_mode")
         ram_style_thresholds = self.get_nodeattr("ram_style_thresholds")
+        # self.code_gen_dict["$PRAGMAS$"] = [
+        #     "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+        # ]
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+        # )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
         self.code_gen_dict["$PRAGMAS$"] = [
-            "#pragma HLS INTERFACE axis port=in0 name=in0_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=in0"
         ]
         self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE axis port=out name=out_" + self.hls_sname()
+            "#pragma HLS INTERFACE axis register port=out"
         )
-        self.code_gen_dict["$PRAGMAS$"].append(
-            "#pragma HLS INTERFACE ap_ctrl_none port=return"
-        )
+        # self.code_gen_dict["$PRAGMAS$"].append(
+        #     "#pragma HLS INTERFACE ap_ctrl_none port=return"
+        # )
+
 
         if mem_mode == "const":
             self.code_gen_dict["$PRAGMAS$"].append('#include "params.h"')

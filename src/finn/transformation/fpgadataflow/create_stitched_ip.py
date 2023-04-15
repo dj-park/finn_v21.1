@@ -325,7 +325,8 @@ class CreateStitchedIP(Transformation):
             ), "All nodes must be FINN fpgadataflow nodes."
             node_inst = getCustomOp(node)
             ip_dir_value = node_inst.get_nodeattr("ip_path")
-            assert os.path.isdir(ip_dir_value), "IP generation directory doesn't exist."
+            # DJP: Just need HLS code
+            # assert os.path.isdir(ip_dir_value), "IP generation directory doesn't exist."
             ip_dirs += [ip_dir_value]
             self.create_cmds += node_inst.code_generation_ipi()
             self.connect_clk_rst(node)
@@ -581,20 +582,20 @@ class CreateStitchedIP(Transformation):
             f.write("cd {}\n".format(vivado_stitch_proj_dir))
             f.write("vivado -mode batch -source make_project.tcl\n")
             f.write("cd {}\n".format(working_dir))
-        bash_command = ["bash", make_project_sh]
-        process_compile = subprocess.Popen(bash_command, stdout=subprocess.PIPE)
-        process_compile.communicate()
-        # wrapper may be created in different location depending on Vivado version
-        if not os.path.isfile(wrapper_filename):
-            # check in alternative location (.gen instead of .srcs)
-            wrapper_filename_alt = wrapper_filename.replace(".srcs", ".gen")
-            if os.path.isfile(wrapper_filename_alt):
-                model.set_metadata_prop("wrapper_filename", wrapper_filename_alt)
-            else:
-                raise Exception(
-                    """CreateStitchedIP failed, no wrapper HDL found under %s or %s.
-                    Please check logs under the parent directory."""
-                    % (wrapper_filename, wrapper_filename_alt)
-                )
+        # bash_command = ["bash", make_project_sh] # DJP: don't run
+        # process_compile = subprocess.Popen(bash_command, stdout=subprocess.PIPE)
+        # process_compile.communicate()
+        # # wrapper may be created in different location depending on Vivado version
+        # if not os.path.isfile(wrapper_filename):
+        #     # check in alternative location (.gen instead of .srcs)
+        #     wrapper_filename_alt = wrapper_filename.replace(".srcs", ".gen")
+        #     if os.path.isfile(wrapper_filename_alt):
+        #         model.set_metadata_prop("wrapper_filename", wrapper_filename_alt)
+        #     else:
+        #         raise Exception(
+        #             """CreateStitchedIP failed, no wrapper HDL found under %s or %s.
+        #             Please check logs under the parent directory."""
+        #             % (wrapper_filename, wrapper_filename_alt)
+        #         )
 
         return (model, False)

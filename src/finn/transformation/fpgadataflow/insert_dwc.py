@@ -86,8 +86,12 @@ class InsertDWC(Transformation):
                             both_8bit_aligned = (larger_width % 8 == 0) and (
                                 smaller_width % 8 == 0
                             )
+                            # if both_8bit_aligned:
+                            #     impl_style = "vivado"
+                            # else:
+                            #     impl_style = "hls"
                             if both_8bit_aligned:
-                                impl_style = "vivado"
+                                impl_style = "hls" # DJP: always generate HLS code
                             else:
                                 impl_style = "hls"
 

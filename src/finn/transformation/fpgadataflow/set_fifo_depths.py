@@ -391,108 +391,109 @@ class InsertAndSetFIFODepths(Transformation):
                 # convnet, two inputs are typically enough to fill entire
                 # layer pipeline due to overlaps
                 n_inputs = 2
-            sim = verilator_fifosim(model, n_inputs)
+        # DJP: Just need HLS code
+        #     sim = verilator_fifosim(model, n_inputs)
 
-        for ind, node in enumerate(fifo_nodes):
-            maxcount_name = "maxcount_%d" % ind
-            if ind == 0:
-                maxcount_name = "maxcount"
-            fifos[node.name] = sim[maxcount_name]
+        # for ind, node in enumerate(fifo_nodes):
+        #     maxcount_name = "maxcount_%d" % ind
+        #     if ind == 0:
+        #         maxcount_name = "maxcount"
+        #     fifos[node.name] = sim[maxcount_name]
 
-        # Apply depths back into the model;
-        # also set in/outFIFODepths to zero for non-FIFO
-        # nodes, preventing further FIFO insertion
-        for node in model.graph.node:
-            # set FIFO depth, reset FIFO implementation,
-            # and set implementation/ram styles
-            if node.op_type == "StreamingFIFO":
-                assert node.name in fifos, "FIFO node not found in size dictionary"
-                # set depth of FIFO
-                depth = optimize_depth(fifos[node.name])
-                node_inst = getCustomOp(node)
-                node_inst.set_nodeattr("depth", depth)
-                node_inst.set_nodeattr("depth_monitor", 0)
-                # exception for top-level IO FIFOs which cause a bug in simulation
-                # (top-level IOs should not have impl_style=vivado)
-                toplevel_in = node.input[0] in [x.name for x in model.graph.input]
-                toplevel_out = node.output[0] in [x.name for x in model.graph.output]
-                toplevel_style_exception = toplevel_in or toplevel_out
-                # Set FIFO implementation/ram styles
-                if (depth > self.max_qsrl_depth) and (not toplevel_style_exception):
-                    node_inst.set_nodeattr("impl_style", "vivado")
-                    node_inst.set_nodeattr("ram_style", self.vivado_ram_style)
-                else:
-                    node_inst.set_nodeattr("impl_style", "rtl")
-                # reset implementation
-                reset_implementation(node_inst)
-                del fifos[node.name]
-            else:
-                # (removed setting of node FIFO size attributes to 0 here)
-                # for every extw node we changed from external to decoupled,
-                # change back and reset implementation
-                if node.op_type in extw_optypes:
-                    if node.name in modified_fc_nodes:
-                        node_inst = getCustomOp(node)
-                        node_inst.set_nodeattr("mem_mode", "external")
-                        reset_implementation(node_inst)
-                        modified_fc_nodes.remove(node.name)
+        # # Apply depths back into the model;
+        # # also set in/outFIFODepths to zero for non-FIFO
+        # # nodes, preventing further FIFO insertion
+        # for node in model.graph.node:
+        #     # set FIFO depth, reset FIFO implementation,
+        #     # and set implementation/ram styles
+        #     if node.op_type == "StreamingFIFO":
+        #         assert node.name in fifos, "FIFO node not found in size dictionary"
+        #         # set depth of FIFO
+        #         depth = optimize_depth(fifos[node.name])
+        #         node_inst = getCustomOp(node)
+        #         node_inst.set_nodeattr("depth", depth)
+        #         node_inst.set_nodeattr("depth_monitor", 0)
+        #         # exception for top-level IO FIFOs which cause a bug in simulation
+        #         # (top-level IOs should not have impl_style=vivado)
+        #         toplevel_in = node.input[0] in [x.name for x in model.graph.input]
+        #         toplevel_out = node.output[0] in [x.name for x in model.graph.output]
+        #         toplevel_style_exception = toplevel_in or toplevel_out
+        #         # Set FIFO implementation/ram styles
+        #         if (depth > self.max_qsrl_depth) and (not toplevel_style_exception):
+        #             node_inst.set_nodeattr("impl_style", "vivado")
+        #             node_inst.set_nodeattr("ram_style", self.vivado_ram_style)
+        #         else:
+        #             node_inst.set_nodeattr("impl_style", "rtl")
+        #         # reset implementation
+        #         reset_implementation(node_inst)
+        #         del fifos[node.name]
+        #     else:
+        #         # (removed setting of node FIFO size attributes to 0 here)
+        #         # for every extw node we changed from external to decoupled,
+        #         # change back and reset implementation
+        #         if node.op_type in extw_optypes:
+        #             if node.name in modified_fc_nodes:
+        #                 node_inst = getCustomOp(node)
+        #                 node_inst.set_nodeattr("mem_mode", "external")
+        #                 reset_implementation(node_inst)
+        #                 modified_fc_nodes.remove(node.name)
 
-        assert (
-            len(modified_fc_nodes) == 0 and len(fifos.keys()) == 0
-        ), "FIFO/FC nodes left untouched after model reconfiguration"
+        # assert (
+        #     len(modified_fc_nodes) == 0 and len(fifos.keys()) == 0
+        # ), "FIFO/FC nodes left untouched after model reconfiguration"
 
-        # handle custom sizing for SWG FIFOs if desired
-        if self.swg_exception:
-            model = model.transform(
-                CapConvolutionFIFODepths(max_qsrl_depth=self.max_qsrl_depth)
-            )
-        # remove shallow FIFOs
-        model = model.transform(RemoveShallowFIFOs())
+        # # handle custom sizing for SWG FIFOs if desired
+        # if self.swg_exception:
+        #     model = model.transform(
+        #         CapConvolutionFIFODepths(max_qsrl_depth=self.max_qsrl_depth)
+        #     )
+        # # remove shallow FIFOs
+        # model = model.transform(RemoveShallowFIFOs())
 
-        # reflect final values in attributes
-        for node in model.graph.node:
-            if node.op_type != "StreamingFIFO":
-                node_inst = getCustomOp(node)
-                fifodepth_in = []
-                for node_inp in node.input:
-                    prod = model.find_producer(node_inp)
-                    if prod is None:
-                        # no producer for this input
-                        if node_inp in [x.name for x in model.graph.input]:
-                            # top-level input with no FIFO
-                            fifodepth_in.append(0)
-                        else:
-                            # FIFO depth attr applies only to dynamic attributes
-                            pass
-                    else:
-                        # there is a producer for this input
-                        if prod.op_type == "StreamingFIFO":
-                            prod_inst = getCustomOp(prod)
-                            fifodepth_in.append(prod_inst.get_nodeattr("depth"))
-                        else:
-                            # explicitly no FIFO on this dynamic input
-                            fifodepth_in.append(0)
-                fifodepth_out = []
-                for node_out in node.output:
-                    cons = model.find_consumer(node_out)
-                    if cons is None:
-                        # no consumer for this output
-                        if node_out in [x.name for x in model.graph.output]:
-                            # top-level output with no FIFO
-                            fifodepth_out.append(0)
-                        else:
-                            # FIFO depth attr applies only to dynamic attributes
-                            pass
-                    else:
-                        # there is a consumer for this input
-                        if cons.op_type == "StreamingFIFO":
-                            cons_inst = getCustomOp(cons)
-                            fifodepth_out.append(cons_inst.get_nodeattr("depth"))
-                        else:
-                            # explicitly no FIFO on this dynamic output
-                            fifodepth_out.append(0)
-                node_inst.set_nodeattr("inFIFODepths", fifodepth_in)
-                node_inst.set_nodeattr("outFIFODepths", fifodepth_out)
+        # # reflect final values in attributes
+        # for node in model.graph.node:
+        #     if node.op_type != "StreamingFIFO":
+        #         node_inst = getCustomOp(node)
+        #         fifodepth_in = []
+        #         for node_inp in node.input:
+        #             prod = model.find_producer(node_inp)
+        #             if prod is None:
+        #                 # no producer for this input
+        #                 if node_inp in [x.name for x in model.graph.input]:
+        #                     # top-level input with no FIFO
+        #                     fifodepth_in.append(0)
+        #                 else:
+        #                     # FIFO depth attr applies only to dynamic attributes
+        #                     pass
+        #             else:
+        #                 # there is a producer for this input
+        #                 if prod.op_type == "StreamingFIFO":
+        #                     prod_inst = getCustomOp(prod)
+        #                     fifodepth_in.append(prod_inst.get_nodeattr("depth"))
+        #                 else:
+        #                     # explicitly no FIFO on this dynamic input
+        #                     fifodepth_in.append(0)
+        #         fifodepth_out = []
+        #         for node_out in node.output:
+        #             cons = model.find_consumer(node_out)
+        #             if cons is None:
+        #                 # no consumer for this output
+        #                 if node_out in [x.name for x in model.graph.output]:
+        #                     # top-level output with no FIFO
+        #                     fifodepth_out.append(0)
+        #                 else:
+        #                     # FIFO depth attr applies only to dynamic attributes
+        #                     pass
+        #             else:
+        #                 # there is a consumer for this input
+        #                 if cons.op_type == "StreamingFIFO":
+        #                     cons_inst = getCustomOp(cons)
+        #                     fifodepth_out.append(cons_inst.get_nodeattr("depth"))
+        #                 else:
+        #                     # explicitly no FIFO on this dynamic output
+        #                     fifodepth_out.append(0)
+        #         node_inst.set_nodeattr("inFIFODepths", fifodepth_in)
+        #         node_inst.set_nodeattr("outFIFODepths", fifodepth_out)
 
         return (model, False)
 
