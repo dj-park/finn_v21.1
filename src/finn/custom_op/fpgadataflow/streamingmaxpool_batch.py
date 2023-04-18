@@ -218,9 +218,7 @@ class StreamingMaxPool_Batch(HLSCustomOp):
 
         if self.is_1d():
             self.code_gen_dict["$DEFINES$"] = [
-                """#define ImgDim {}\n #define PoolDim {}\n
-                #define NumChannels {}\n #define PE {}\n #define OutputSize {}
-                \n #define numReps {}""".format(
+                """#define ImgDim {}\n#define PoolDim {}\n#define NumChannels {}\n#define PE {}\n#define OutputSize {}\n#define numReps {}""".format(
                     ifm_dim[1],
                     k[1],
                     self.get_nodeattr("NumChannels"),
@@ -231,8 +229,7 @@ class StreamingMaxPool_Batch(HLSCustomOp):
             ]
         else:
             self.code_gen_dict["$DEFINES$"] = [
-                """#define ImgDim {}\n #define PoolDim {}\n
-                #define NumChannels {}\n #define numReps {}""".format(
+                """#define ImgDim {}\n#define PoolDim {}\n#define NumChannels {}\n#define numReps {}""".format(
                     ifm_dim[1],
                     k[1],
                     self.get_nodeattr("NumChannels"),

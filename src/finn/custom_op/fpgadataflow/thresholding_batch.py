@@ -607,8 +607,7 @@ class Thresholding_Batch(HLSCustomOp):
         total_spatial_size = int(np.prod(numInputVectors))
 
         self.code_gen_dict["$DEFINES$"] = [
-            """#define NumChannels1 {}\n #define PE1 {}\n #define numReps {}\n
-               #define ImgDim1 {}""".format(
+            """#define NumChannels1 {}\n#define PE1 {}\n#define numReps {}\n#define ImgDim1 {}""".format(
                 self.get_nodeattr("NumChannels"),
                 self.get_nodeattr("PE"),
                 numReps,

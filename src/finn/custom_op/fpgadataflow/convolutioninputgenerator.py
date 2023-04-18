@@ -379,10 +379,7 @@ class ConvolutionInputGenerator(HLSCustomOp):
         ifm_precision = self.get_input_datatype().bitwidth()
 
         self.code_gen_dict["$DEFINES$"] = [
-            """#define ConvKernelDim1 {}\n #define IFMChannels1 {}\n
-            #define Input_precision1 {}\n #define IFMDim1 {}\n
-            #define OFMDim1 {}\n #define SIMD1 {}\n
-            #define Stride1 {}\n #define numReps {}""".format(
+            """#define ConvKernelDim1 {}\n#define IFMChannels1 {}\n#define Input_precision1 {}\n#define IFMDim1 {}\n#define OFMDim1 {}\n#define SIMD1 {}\n#define Stride1 {}\n#define numReps {}""".format(
                 k, ifm_ch, ifm_precision, ifm_dim, ofm_dim, simd, stride, numReps
             )
         ]
