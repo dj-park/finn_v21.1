@@ -46,13 +46,20 @@ def _codegen_single_node(node, model, fpgapart, clk):
         # get the path of the code generation directory
         code_gen_dir = inst.get_nodeattr("code_gen_dir_ipgen")
         # ensure that there is a directory
+
+        # print("here? 1 ")
         if code_gen_dir == "" or not os.path.isdir(code_gen_dir):
             code_gen_dir = make_build_dir(
-                prefix="code_gen_ipgen_" + str(node.name) + "_"
+                # prefix="code_gen_ipgen_" + str(node.name) + "_"
+                prefix=str(node.name) + "_"
             )
             inst.set_nodeattr("code_gen_dir_ipgen", code_gen_dir)
             # ensure that there is generated code inside the dir
+            # print("here? 2 ")
+            # print(node.name)
+
             inst.code_generation_ipgen(model, fpgapart, clk)
+            # print("here? 3 ")
         else:
             warnings.warn("Using pre-existing code for %s" % node.name)
     except KeyError:
